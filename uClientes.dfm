@@ -20,32 +20,54 @@ object frmClientes: TfrmClientes
     Width = 762
     Height = 96
     Align = alTop
+    Color = clSilver
+    ParentBackground = False
     TabOrder = 0
+    ExplicitTop = -6
     object SpeedButton1: TSpeedButton
-      Left = 622
-      Top = 30
+      Left = 610
+      Top = 33
       Width = 23
       Height = 22
     end
+    object lblPesquisa: TLabel
+      Left = 16
+      Top = 19
+      Width = 42
+      Height = 13
+      Caption = 'Pesquisa'
+    end
     object edtPesquisa: TEdit
-      Left = 24
-      Top = 31
+      Left = 16
+      Top = 38
       Width = 385
       Height = 21
+      Color = clBtnFace
       TabOrder = 0
     end
-    object RadioGroup1: TRadioGroup
-      Left = 415
-      Top = 6
-      Width = 185
-      Height = 75
-      Caption = 'Status'
-      ItemIndex = 1
-      Items.Strings = (
-        'Todos'
-        'Ativos'
-        'Inativos')
+    object rbtInativos: TRadioButton
+      Left = 477
+      Top = 38
+      Width = 60
+      Height = 17
+      Caption = 'Inativos'
       TabOrder = 1
+    end
+    object rdbAtivos: TRadioButton
+      Left = 419
+      Top = 38
+      Width = 60
+      Height = 17
+      Caption = 'Ativos'
+      TabOrder = 2
+    end
+    object rdbTodos: TRadioButton
+      Left = 544
+      Top = 38
+      Width = 60
+      Height = 17
+      Caption = 'Todos'
+      TabOrder = 3
     end
   end
   object pnlFooter: TPanel
@@ -54,6 +76,8 @@ object frmClientes: TfrmClientes
     Width = 762
     Height = 43
     Align = alBottom
+    Color = clSilver
+    ParentBackground = False
     TabOrder = 1
   end
   object pnlDetails: TPanel
@@ -62,9 +86,10 @@ object frmClientes: TfrmClientes
     Width = 762
     Height = 216
     Align = alClient
+    Color = clSilver
+    ParentBackground = False
     TabOrder = 2
-    ExplicitTop = 219
-    ExplicitHeight = 231
+    ExplicitTop = 234
   end
   object pnlMaster: TPanel
     Left = 0
@@ -72,31 +97,9 @@ object frmClientes: TfrmClientes
     Width = 762
     Height = 144
     Align = alTop
+    Color = clSilver
+    ParentBackground = False
     TabOrder = 3
-    ExplicitTop = 81
-    object BitBtn1: TBitBtn
-      Left = 622
-      Top = 40
-      Width = 75
-      Height = 25
-      Caption = 'Incluir'
-      TabOrder = 0
-    end
-    object BitBtn2: TBitBtn
-      Left = 622
-      Top = 71
-      Width = 75
-      Height = 25
-      Caption = 'Alterar'
-      TabOrder = 1
-    end
-    object BitBtn3: TBitBtn
-      Left = 622
-      Top = 102
-      Width = 75
-      Height = 25
-      Caption = 'Excluir'
-      TabOrder = 2
-    end
+    ExplicitTop = 90
   end
 end

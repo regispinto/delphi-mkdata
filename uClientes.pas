@@ -11,13 +11,13 @@ type
     pnlHeader: TPanel;
     pnlFooter: TPanel;
     pnlDetails: TPanel;
-    pnlMaster: TPanel;
     edtPesquisa: TEdit;
-    RadioGroup1: TRadioGroup;
     SpeedButton1: TSpeedButton;
-    BitBtn1: TBitBtn;
-    BitBtn2: TBitBtn;
-    BitBtn3: TBitBtn;
+    rbtInativos: TRadioButton;
+    rdbAtivos: TRadioButton;
+    rdbTodos: TRadioButton;
+    lblPesquisa: TLabel;
+    pnlMaster: TPanel;
   private
     { Private declarations }
   public
