@@ -5,7 +5,10 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons,
-  Vcl.Mask, Vcl.DBCtrls, Vcl.ComCtrls, Data.DB, Vcl.Grids, Vcl.DBGrids;
+  Vcl.Mask, Vcl.DBCtrls, Vcl.ComCtrls, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client;
 
 type
   TfrmClientes = class(TForm)
@@ -20,8 +23,8 @@ type
     rdbAtivos: TRadioButton;
     rbtInativos: TRadioButton;
     rdbTodos: TRadioButton;
-    Label1: TLabel;
-    GroupBox1: TGroupBox;
+    lblCliente: TLabel;
+    gbxTipo: TGroupBox;
     rdbPessoaFisica: TRadioButton;
     rdbPessoaJuridica: TRadioButton;
     lblRGIE: TLabel;
@@ -64,6 +67,8 @@ type
     dbePais: TDBEdit;
     lblEstado: TLabel;
     lblPais: TLabel;
+    QryClientes: TFDQuery;
+    dsClientes: TDataSource;
     procedure rdbPessoaFisicaClick(Sender: TObject);
     procedure rdbPessoaJuridicaClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -79,6 +84,12 @@ type
     procedure SetarPainelMestre(Status: Boolean=False);
     procedure SetarBotoesCliente(Status: Boolean=False);
     procedure SetarPainelHeader(Status: Boolean=True);
+    procedure ListarClientes;
+    procedure SetarCampos(Operacao: Integer=1);
+
+    function GravarDadosInformados: Boolean;
+    function ValidaCampos: Boolean;
+    procedure SetarCamposObrigatorios;
     { Private declarations }
   public
     { Public declarations }
@@ -91,6 +102,8 @@ implementation
 
 {$R *.dfm}
 
+uses uDM, uFunctions;
+
 procedure TfrmClientes.FormCreate(Sender: TObject);
 begin
   dtpDataCadastro.Date := Now;
@@ -100,6 +113,10 @@ begin
   SetarPainelMestre;
 
   SetarBotoesCliente(True);
+
+  ListarClientes;
+
+  dcbAtivo.Checked := False;
 end;
 
 procedure TfrmClientes.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -111,6 +128,7 @@ procedure TfrmClientes.rdbPessoaFisicaClick(Sender: TObject);
 begin
   lblCPFCNPJ.Caption := 'CPF';
   lblRGIE.Caption := 'RG';
+
   dbeCPF_CNPJ.SetFocus;
 end;
 
@@ -122,21 +140,30 @@ begin
 
   SetarBotoesCliente(False);
 
+  SetarCampos;
+
   dbeNomeCliente.SetFocus;
 end;
 
 procedure TfrmClientes.btnClienteGravarClick(Sender: TObject);
 begin
-  SetarPainelMestre();
+  if (ValidaCampos) and (GravarDadosInformados) then
+    begin
+      SetarPainelMestre;
 
-  SetarBotoesCliente(True);
+      SetarBotoesCliente(True);
+    end;
 end;
 
 procedure TfrmClientes.btnClienteCancelarClick(Sender: TObject);
 begin
-  SetarPainelMestre();
+  QryClientes.Cancel;
+
+  SetarPainelMestre;
 
   SetarBotoesCliente(True);
+
+  SetarCamposObrigatorios;
 end;
 
 procedure TfrmClientes.rdbPessoaJuridicaClick(Sender: TObject);
@@ -188,4 +215,151 @@ begin
   pnlHeader.Enabled := Status;
 end;
 
+procedure TfrmClientes.SetarCampos(Operacao: Integer=1);
+begin
+  case Operacao of
+    1:  begin
+          dcbAtivo.Checked := True;
+          dtpDataCadastro.Date := now;
+        end;
+
+    2:  begin
+        end;
+  end;
+end;
+
+procedure TfrmClientes.ListarClientes;
+begin
+  QryClientes.Close;
+  QryClientes.SQL.Clear;
+  QryClientes.SQL.Add('SELECT * FROM CLIENTES c');
+  QryClientes.SQL.Add('LEFT JOIN TELEFONES t on t.IDCLIENTE = c.ID');
+  QryClientes.SQL.Add('LEFT JOIN ENDERECOS e on e.IDCLIENTE = c.ID');
+  QryClientes.Close;
+  QryClientes.Open;
+end;
+
+function TfrmClientes.ValidaCampos: Boolean;
+begin
+  SetarCamposObrigatorios;
+
+  Result := True;
+
+  if dbeNomeCliente.Text = EmptyStr then
+    begin
+      lblCliente.Caption    := 'Nome*';
+      lblCliente.Font.Style := [TFontStyle.fsBold];
+
+      Result := False;
+    end;
+
+  if (not rdbPessoaFisica.Checked) and (not rdbPessoaJuridica.Checked) then
+    begin
+      gbxTipo.Caption := 'Tipo *';
+      gbxTipo.Font.Style := [TFontStyle.fsBold];
+
+      rdbPessoaFisica.Font.Style := [];
+      rdbPessoaJuridica.Font.Style := [];
+
+      Result := False;
+    end;
+
+  if dbeCPF_CNPJ.Text = EmptyStr then
+    begin
+      lblCPFCNPJ.Caption := lblCPFCNPJ.Caption + '*';
+      lblCPFCNPJ.Font.Style := [TFontStyle.fsBold];
+
+      Result := False;
+    end;
+
+    if not Result then
+      ShowMessage('Favor preecher os campos obrigatórios')
+end;
+
+function TfrmClientes.GravarDadosInformados: Boolean;
+var
+  SaveSQL: TFDQuery;
+
+begin
+  try
+    try
+      SaveSQL := TFDQuery.Create(Application);
+      SaveSQL.Connection := Dm.FDConnection;
+
+      SaveSQL.SQL.Clear;
+      SaveSQL.SQL.Add('insert into CLIENTES ');
+      SaveSQL.SQL.Add('(nome, tipo, cpf_cnpj, rg_ie, data_cadastro, ativo) ');
+      SaveSQL.SQL.Add('values ');
+      {
+      SaveSQL.SQL.Add('(');
+
+      SaveSQL.SQL.Add(QuotedStr(dbeNomeCliente.Text) + ', ');
+
+      if rdbPessoaFisica.Checked then
+        SaveSQL.SQL.Add(QuotedStr('F') + ', ');
+
+      if rdbPessoaJuridica.Checked then
+        SaveSQL.SQL.Add(QuotedStr('J') + ', ');
+
+      SaveSQL.SQL.Add(QuotedStr(dbeCPF_CNPJ.Text) + ', ');
+      SaveSQL.SQL.Add(QuotedStr(dbeRG_IE.Text) + ', ');
+      SaveSQL.SQL.Add(QuotedStr(DateToStr(dtpDataCadastro.Date)) + ', ');
+
+      if dcbAtivo.Checked then
+        SaveSQL.SQL.Add(QuotedStr('A'))
+      else
+        SaveSQL.SQL.Add(QuotedStr('I'));
+
+      SaveSQL.SQL.Add(')');
+      }
+
+      SaveSQL.SQL.Add(':pNome, :pTipo, :pCpfCnpj, :pRgIe, :pCadastro, :pAtivo)');
+      //
+      SaveSQL.ParamByName('pNome').AsString := dbeNomeCliente.Text;
+      SaveSQL.ParamByName('pTipo').AsString := 'F';
+
+      if rdbPessoaJuridica.Checked then
+        SaveSQL.ParamByName('pTipo').AsString  := 'J';
+
+      SaveSQL.ParamByName('pCpfCnpj').AsString := dbeCPF_CNPJ.Text;
+      SaveSQL.ParamByName('pRgIe').AsString := dbeRG_IE.Text;
+      SaveSQL.ParamByName('pCadastro').AsDate := dtpDataCadastro.Date;
+      SaveSQL.ParamByName('pAtivo').AsString := 'I';
+
+      if dcbAtivo.Checked then
+        SaveSQL.ParamByName('pAtivo').AsString := 'A';
+
+      SaveLog(SaveSQL.SQL.Text);
+
+      SaveSQL.ExecSQL;
+      //
+      Result := SaveSQL.RowsAffected > 0;
+    finally
+      FreeAndNil(SaveSQL);
+
+    end;
+  except
+    on E:Exception do
+    begin
+      Result := False;
+
+      raise Exception.Create('Atenção ocorreu um erro ' +#13+ e.ToString);
+    end;
+  end;
+end;
+
+procedure TfrmClientes.SetarCamposObrigatorios;
+begin
+  lblCliente.Caption := 'Nome';
+  lblCliente.Font.Style := [];
+
+  gbxTipo.Caption := 'Tipo';
+  gbxTipo.Font.Style := [];
+
+  lblCPFCNPJ.Caption := 'CPF';
+  lblCPFCNPJ.Font.Style := [];
+end;
+
 end.
+
+

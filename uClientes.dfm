@@ -28,7 +28,6 @@ object frmClientes: TfrmClientes
     Color = clMoneyGreen
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 863
     object spbPesquisar: TSpeedButton
       Left = 730
       Top = 19
@@ -96,8 +95,6 @@ object frmClientes: TfrmClientes
     Color = clMoneyGreen
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 384
-    ExplicitWidth = 863
     object btnClienteIncluir: TBitBtn
       Left = 7
       Top = 4
@@ -126,7 +123,7 @@ object frmClientes: TfrmClientes
     end
     object btnClienteCancelar: TBitBtn
       Left = 169
-      Top = 4
+      Top = 3
       Width = 75
       Height = 25
       Cursor = crHandPoint
@@ -147,22 +144,27 @@ object frmClientes: TfrmClientes
     Color = clSilver
     ParentBackground = False
     TabOrder = 2
-    ExplicitLeft = 241
-    ExplicitTop = 74
-    ExplicitWidth = 622
-    ExplicitHeight = 491
     object dbgListaClientes: TDBGrid
       Left = 1
       Top = 1
       Width = 815
       Height = 145
       Align = alClient
+      DataSource = dsClientes
+      DrawingStyle = gdsClassic
+      FixedColor = clMoneyGreen
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
       TabOrder = 0
       TitleFont.Charset = DEFAULT_CHARSET
       TitleFont.Color = clWindowText
       TitleFont.Height = -11
       TitleFont.Name = 'Tahoma'
       TitleFont.Style = []
+      Columns = <
+        item
+          Expanded = False
+          Visible = True
+        end>
     end
     object StatusBar1: TStatusBar
       Left = 1
@@ -171,8 +173,6 @@ object frmClientes: TfrmClientes
       Height = 19
       Color = clMoneyGreen
       Panels = <>
-      ExplicitTop = 148
-      ExplicitWidth = 861
     end
   end
   object pnlMaster: TPanel
@@ -184,7 +184,8 @@ object frmClientes: TfrmClientes
     Color = clSilver
     ParentBackground = False
     TabOrder = 3
-    object Label1: TLabel
+    ExplicitTop = 72
+    object lblCliente: TLabel
       Left = 16
       Top = 6
       Width = 33
@@ -211,25 +212,48 @@ object frmClientes: TfrmClientes
       Width = 48
       Height = 13
       Caption = 'CPF/CNPJ'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
     end
-    object GroupBox1: TGroupBox
+    object gbxTipo: TGroupBox
       Left = 448
       Top = 6
       Width = 354
       Height = 61
       Caption = ' Tipo '
+      Color = clSilver
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentBackground = False
+      ParentColor = False
+      ParentFont = False
       TabOrder = 0
       object rdbPessoaFisica: TRadioButton
-        Left = 8
+        Left = 9
         Top = 21
         Width = 44
         Height = 17
         Caption = 'F'#237'sca'
+        Color = clSilver
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
         TabOrder = 0
         OnClick = rdbPessoaFisicaClick
       end
       object rdbPessoaJuridica: TRadioButton
-        Left = 61
+        Left = 77
         Top = 21
         Width = 60
         Height = 17
@@ -243,17 +267,21 @@ object frmClientes: TfrmClientes
       Top = 76
       Width = 99
       Height = 21
+      Cursor = crHandPoint
       Date = 44835.000000000000000000
       Time = 0.699267118056013700
+      Checked = False
       TabOrder = 1
     end
     object dcbAtivo: TDBCheckBox
       Left = 362
-      Top = 77
+      Top = 78
       Width = 48
       Height = 17
       Cursor = crHandPoint
       Caption = 'Ativo'
+      DataField = 'ATIVO'
+      DataSource = dsClientes
       TabOrder = 2
     end
     object dbeNomeCliente: TDBEdit
@@ -261,6 +289,9 @@ object frmClientes: TfrmClientes
       Top = 25
       Width = 394
       Height = 21
+      CharCase = ecUpperCase
+      DataField = 'NOME'
+      DataSource = dsClientes
       TabOrder = 3
     end
     object dbeCPF_CNPJ: TDBEdit
@@ -268,6 +299,8 @@ object frmClientes: TfrmClientes
       Top = 76
       Width = 93
       Height = 21
+      DataField = 'CPF_CNPJ'
+      DataSource = dsClientes
       TabOrder = 4
     end
     object dbeRG_IE: TDBEdit
@@ -275,6 +308,8 @@ object frmClientes: TfrmClientes
       Top = 76
       Width = 93
       Height = 21
+      DataField = 'RG_IE'
+      DataSource = dsClientes
       TabOrder = 5
     end
     object gbxTelefone: TGroupBox
@@ -361,7 +396,7 @@ object frmClientes: TfrmClientes
     end
     object gbxEndereco: TGroupBox
       Left = 241
-      Top = 109
+      Top = 103
       Width = 561
       Height = 170
       Caption = ' Endere'#231'o '
@@ -489,5 +524,18 @@ object frmClientes: TfrmClientes
         TabOrder = 7
       end
     end
+  end
+  object QryClientes: TFDQuery
+    Connection = DM.FDConnection
+    SQL.Strings = (
+      'SELECT * FROM CLIENTES c'
+      'LEFT JOIN ENDERECOS e on e.IDCLIENTE = c.ID')
+    Left = 408
+    Top = 281
+  end
+  object dsClientes: TDataSource
+    DataSet = QryClientes
+    Left = 408
+    Top = 333
   end
 end
