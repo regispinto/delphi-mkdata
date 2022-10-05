@@ -160,11 +160,8 @@ object frmClientes: TfrmClientes
       TitleFont.Height = -11
       TitleFont.Name = 'Tahoma'
       TitleFont.Style = []
-      Columns = <
-        item
-          Expanded = False
-          Visible = True
-        end>
+      OnCellClick = dbgListaClientesCellClick
+      OnDrawColumnCell = dbgListaClientesDrawColumnCell
     end
     object StatusBar1: TStatusBar
       Left = 1
@@ -184,7 +181,6 @@ object frmClientes: TfrmClientes
     Color = clSilver
     ParentBackground = False
     TabOrder = 3
-    ExplicitTop = 72
     object lblCliente: TLabel
       Left = 16
       Top = 6
@@ -530,12 +526,16 @@ object frmClientes: TfrmClientes
     SQL.Strings = (
       'SELECT * FROM CLIENTES c'
       'LEFT JOIN ENDERECOS e on e.IDCLIENTE = c.ID')
-    Left = 408
-    Top = 281
+    Left = 24
+    Top = 417
   end
   object dsClientes: TDataSource
     DataSet = QryClientes
-    Left = 408
-    Top = 333
+    Left = 84
+    Top = 417
+  end
+  object imgFormulario: TImageList
+    Left = 152
+    Top = 416
   end
 end

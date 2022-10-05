@@ -21,7 +21,6 @@ type
     FDGUIxWaitCursor: TFDGUIxWaitCursor;
 
     procedure DataModuleCreate(Sender: TObject);
-    procedure DataModuleDestroy(Sender: TObject);
   private
     { Private declarations }
   public
@@ -43,17 +42,23 @@ uses uClientes;
 
 procedure TDM.DataModuleCreate(Sender: TObject);
 begin
-  Conexao           := TConnect.Create( FDConnection );
-  Conexao.DriverID  := 'SQLite';
-  Conexao.FileName  := 'mkdata.db';
-  Conexao.Path      := 'Database';
+  Conexao := TConnect.Create( FDConnection );
 
-  Conexao.SetConnectDatabase;
+  try
+    Conexao.DriverID  := 'SQLite';
+    Conexao.FileName  := 'mkdata.db';
+    Conexao.Path      := 'Database';
 
-  if not Conexao.ConnectionDatabase then
-    Conexao.CreateDatabase;
+    Conexao.SetConnectDatabase;
 
-  Conexao.CreateUpedateDB;
+    if not Conexao.ConnectionDatabase then
+      Conexao.CreateDatabase;
+
+    Conexao.CreateUpedateDB;
+  finally
+    FreeAndNil(Conexao)
+
+  end;
 
   try
     frmClientes := TfrmClientes.Create(nil);
@@ -62,11 +67,6 @@ begin
     FreeAndNil(frmClientes);
   end;
 
-end;
-
-procedure TDM.DataModuleDestroy(Sender: TObject);
-begin
-  Conexao.Destroy;
 end;
 
 end.

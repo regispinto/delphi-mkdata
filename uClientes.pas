@@ -8,7 +8,8 @@ uses
   Vcl.Mask, Vcl.DBCtrls, Vcl.ComCtrls, Data.DB, Vcl.Grids, Vcl.DBGrids,
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
-  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  System.ImageList, Vcl.ImgList;
 
 type
   TfrmClientes = class(TForm)
@@ -69,6 +70,7 @@ type
     lblPais: TLabel;
     QryClientes: TFDQuery;
     dsClientes: TDataSource;
+    imgFormulario: TImageList;
     procedure rdbPessoaFisicaClick(Sender: TObject);
     procedure rdbPessoaJuridicaClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -79,6 +81,9 @@ type
     procedure btnClienteIncluirClick(Sender: TObject);
     procedure btnClienteGravarClick(Sender: TObject);
     procedure btnClienteCancelarClick(Sender: TObject);
+    procedure dbgListaClientesDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure dbgListaClientesCellClick(Column: TColumn);
   private
     procedure SetarBotoesTelefone(Status: Boolean=True);
     procedure SetarPainelMestre(Status: Boolean=False);
@@ -102,7 +107,7 @@ implementation
 
 {$R *.dfm}
 
-uses uDM, uFunctions;
+uses uDM, uFunctions, uClassConnection;
 
 procedure TfrmClientes.FormCreate(Sender: TObject);
 begin
@@ -134,6 +139,8 @@ end;
 
 procedure TfrmClientes.btnClienteIncluirClick(Sender: TObject);
 begin
+  QryClientes.Insert;
+
   SetarPainelHeader(False);
 
   SetarPainelMestre(True);
@@ -143,6 +150,34 @@ begin
   SetarCampos;
 
   dbeNomeCliente.SetFocus;
+end;
+
+procedure TfrmClientes.dbgListaClientesCellClick(Column: TColumn);
+begin
+  {Validamos se estamos na Coluna 3 e se o valor do campo Ativo é N , se for mudamos para S}
+  if Column.Index = 2 Then
+    if Column.Grid.DataSource.DataSet.Fields[Column.Index].AsString = 'N' Then
+      begin
+        Column.Grid.DataSource.DataSet.Edit;
+        Column.Grid.DataSource.DataSet.Fields[Column.Index].Value := 'S'
+      end
+    else
+      begin
+        Column.Grid.DataSource.DataSet.Edit;
+        Column.Grid.DataSource.DataSet.Fields[Column.Index].Value := 'N'
+      end;
+end;
+
+procedure TfrmClientes.dbgListaClientesDrawColumnCell(Sender: TObject;
+  const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
+begin
+  if Column.Field = QryClientes.FieldByName('ATIVO') then
+   begin
+     TDBGrid(Sender).Canvas.FillRect(Rect);
+     imgFormulario.Draw(TDBGrid(Sender).Canvas, Rect.Left +1,Rect.Top + 1, 0);
+     if QryClientes.FieldByName('ATIVO').Text = 'S' then
+       imgFormulario.Draw(TDBGrid(Sender).Canvas, Rect.Left +1,Rect.Top + 1, 1)
+   end;
 end;
 
 procedure TfrmClientes.btnClienteGravarClick(Sender: TObject);
@@ -285,35 +320,11 @@ begin
     try
       SaveSQL := TFDQuery.Create(Application);
       SaveSQL.Connection := Dm.FDConnection;
-
       SaveSQL.SQL.Clear;
       SaveSQL.SQL.Add('insert into CLIENTES ');
       SaveSQL.SQL.Add('(nome, tipo, cpf_cnpj, rg_ie, data_cadastro, ativo) ');
       SaveSQL.SQL.Add('values ');
-      {
-      SaveSQL.SQL.Add('(');
-
-      SaveSQL.SQL.Add(QuotedStr(dbeNomeCliente.Text) + ', ');
-
-      if rdbPessoaFisica.Checked then
-        SaveSQL.SQL.Add(QuotedStr('F') + ', ');
-
-      if rdbPessoaJuridica.Checked then
-        SaveSQL.SQL.Add(QuotedStr('J') + ', ');
-
-      SaveSQL.SQL.Add(QuotedStr(dbeCPF_CNPJ.Text) + ', ');
-      SaveSQL.SQL.Add(QuotedStr(dbeRG_IE.Text) + ', ');
-      SaveSQL.SQL.Add(QuotedStr(DateToStr(dtpDataCadastro.Date)) + ', ');
-
-      if dcbAtivo.Checked then
-        SaveSQL.SQL.Add(QuotedStr('A'))
-      else
-        SaveSQL.SQL.Add(QuotedStr('I'));
-
-      SaveSQL.SQL.Add(')');
-      }
-
-      SaveSQL.SQL.Add(':pNome, :pTipo, :pCpfCnpj, :pRgIe, :pCadastro, :pAtivo)');
+      SaveSQL.SQL.Add('(:pNome, :pTipo, :pCpfCnpj, :pRgIe, :pCadastro, :pAtivo)');
       //
       SaveSQL.ParamByName('pNome').AsString := dbeNomeCliente.Text;
       SaveSQL.ParamByName('pTipo').AsString := 'F';
@@ -332,8 +343,10 @@ begin
       SaveLog(SaveSQL.SQL.Text);
 
       SaveSQL.ExecSQL;
-      //
+
       Result := SaveSQL.RowsAffected > 0;
+
+      ShowMessage( BoolToStr(Result, True) );
     finally
       FreeAndNil(SaveSQL);
 
