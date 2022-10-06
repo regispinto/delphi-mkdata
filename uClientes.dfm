@@ -61,7 +61,7 @@ object frmClientes: TfrmClientes
       Caption = ' Status '
       TabOrder = 1
       object rdbAtivos: TRadioButton
-        Left = 3
+        Left = 14
         Top = 21
         Width = 60
         Height = 17
@@ -69,7 +69,7 @@ object frmClientes: TfrmClientes
         TabOrder = 0
       end
       object rbtInativos: TRadioButton
-        Left = 61
+        Left = 72
         Top = 21
         Width = 60
         Height = 17
@@ -77,7 +77,7 @@ object frmClientes: TfrmClientes
         TabOrder = 1
       end
       object rdbTodos: TRadioButton
-        Left = 127
+        Left = 138
         Top = 21
         Width = 60
         Height = 17
@@ -97,7 +97,7 @@ object frmClientes: TfrmClientes
     TabOrder = 1
     object btnClienteIncluir: TBitBtn
       Left = 7
-      Top = 4
+      Top = 3
       Width = 75
       Height = 25
       Cursor = crHandPoint
@@ -150,6 +150,7 @@ object frmClientes: TfrmClientes
       Width = 815
       Height = 145
       Align = alClient
+      BorderStyle = bsNone
       DataSource = dsClientes
       DrawingStyle = gdsClassic
       FixedColor = clMoneyGreen
@@ -162,6 +163,37 @@ object frmClientes: TfrmClientes
       TitleFont.Style = []
       OnCellClick = dbgListaClientesCellClick
       OnDrawColumnCell = dbgListaClientesDrawColumnCell
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'NOME'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'TIPO'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'CPF_CNPJ'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'RG_IE'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'DATA_CADASTRO'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'ATIVO'
+          Visible = True
+        end>
     end
     object StatusBar1: TStatusBar
       Left = 1
@@ -218,9 +250,9 @@ object frmClientes: TfrmClientes
     object gbxTipo: TGroupBox
       Left = 448
       Top = 6
-      Width = 354
+      Width = 362
       Height = 61
-      Caption = ' Tipo '
+      Caption = ' Pessoa '
       Color = clSilver
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -232,7 +264,7 @@ object frmClientes: TfrmClientes
       ParentFont = False
       TabOrder = 0
       object rdbPessoaFisica: TRadioButton
-        Left = 9
+        Left = 14
         Top = 21
         Width = 44
         Height = 17
@@ -249,7 +281,7 @@ object frmClientes: TfrmClientes
         OnClick = rdbPessoaFisicaClick
       end
       object rdbPessoaJuridica: TRadioButton
-        Left = 77
+        Left = 88
         Top = 21
         Width = 60
         Height = 17
@@ -268,6 +300,7 @@ object frmClientes: TfrmClientes
       Time = 0.699267118056013700
       Checked = False
       TabOrder = 1
+      OnKeyPress = dtpDataCadastroKeyPress
     end
     object dcbAtivo: TDBCheckBox
       Left = 362
@@ -279,6 +312,7 @@ object frmClientes: TfrmClientes
       DataField = 'ATIVO'
       DataSource = dsClientes
       TabOrder = 2
+      OnKeyPress = dcbAtivoKeyPress
     end
     object dbeNomeCliente: TDBEdit
       Left = 16
@@ -289,6 +323,7 @@ object frmClientes: TfrmClientes
       DataField = 'NOME'
       DataSource = dsClientes
       TabOrder = 3
+      OnKeyPress = dbeNomeClienteKeyPress
     end
     object dbeCPF_CNPJ: TDBEdit
       Left = 16
@@ -298,6 +333,9 @@ object frmClientes: TfrmClientes
       DataField = 'CPF_CNPJ'
       DataSource = dsClientes
       TabOrder = 4
+      OnEnter = dbeCPF_CNPJEnter
+      OnKeyPress = dbeCPF_CNPJKeyPress
+      OnMouseEnter = dbeCPF_CNPJMouseEnter
     end
     object dbeRG_IE: TDBEdit
       Left = 131
@@ -307,6 +345,8 @@ object frmClientes: TfrmClientes
       DataField = 'RG_IE'
       DataSource = dsClientes
       TabOrder = 5
+      OnKeyPress = dbeRG_IEKeyPress
+      OnMouseEnter = dbeRG_IEMouseEnter
     end
     object gbxTelefone: TGroupBox
       Left = 16
@@ -392,8 +432,8 @@ object frmClientes: TfrmClientes
     end
     object gbxEndereco: TGroupBox
       Left = 241
-      Top = 103
-      Width = 561
+      Top = 109
+      Width = 569
       Height = 170
       Caption = ' Endere'#231'o '
       TabOrder = 7
@@ -450,7 +490,7 @@ object frmClientes: TfrmClientes
         Caption = 'Cidade'
       end
       object lblEstado: TLabel
-        Left = 447
+        Left = 449
         Top = 65
         Width = 33
         Height = 13
@@ -468,21 +508,26 @@ object frmClientes: TfrmClientes
         Top = 33
         Width = 329
         Height = 21
-        TabOrder = 0
+        TabOrder = 1
+        OnKeyPress = dbeLogadouroKeyPress
       end
       object dbeCEP: TDBEdit
         Left = 7
         Top = 33
         Width = 65
         Height = 21
-        TabOrder = 1
+        TabOrder = 0
+        OnKeyPress = dbeCEPKeyPress
       end
       object dbeNumero: TDBEdit
         Left = 449
         Top = 33
         Width = 40
         Height = 21
+        DataField = 'NUMERO'
+        DataSource = dsClientes
         TabOrder = 2
+        OnKeyPress = dbeNumeroKeyPress
       end
       object dbeComplemento: TDBEdit
         Left = 495
@@ -490,27 +535,31 @@ object frmClientes: TfrmClientes
         Width = 65
         Height = 21
         TabOrder = 3
+        OnKeyPress = dbeComplementoKeyPress
       end
       object dbeCidade: TDBEdit
         Left = 110
         Top = 80
         Width = 329
         Height = 21
-        TabOrder = 4
+        TabOrder = 5
+        OnKeyPress = dbeCidadeKeyPress
       end
       object dbeBairro: TDBEdit
         Left = 9
         Top = 80
         Width = 92
         Height = 21
-        TabOrder = 5
+        TabOrder = 4
+        OnKeyPress = dbeBairroKeyPress
       end
       object dbeEstado: TDBEdit
         Left = 449
-        Top = 81
+        Top = 80
         Width = 111
         Height = 21
         TabOrder = 6
+        OnKeyPress = dbeEstadoKeyPress
       end
       object dbePais: TDBEdit
         Left = 9
@@ -518,16 +567,142 @@ object frmClientes: TfrmClientes
         Width = 92
         Height = 21
         TabOrder = 7
+        OnKeyPress = dbePaisKeyPress
       end
     end
   end
   object QryClientes: TFDQuery
+    AfterScroll = QryClientesAfterScroll
     Connection = DM.FDConnection
     SQL.Strings = (
       'SELECT * FROM CLIENTES c'
       'LEFT JOIN ENDERECOS e on e.IDCLIENTE = c.ID')
     Left = 24
     Top = 417
+    object QryClientesID: TFDAutoIncField
+      FieldName = 'ID'
+      Origin = 'ID'
+      ProviderFlags = [pfInWhere, pfInKey]
+    end
+    object QryClientesNOME: TStringField
+      FieldName = 'NOME'
+      Origin = 'NOME'
+      Required = True
+      Size = 40
+    end
+    object QryClientesTIPO: TStringField
+      FieldName = 'TIPO'
+      Origin = 'TIPO'
+      Required = True
+      FixedChar = True
+      Size = 1
+    end
+    object QryClientesCPF_CNPJ: TStringField
+      FieldName = 'CPF_CNPJ'
+      Origin = 'CPF_CNPJ'
+      Required = True
+      Size = 14
+    end
+    object QryClientesRG_IE: TStringField
+      FieldName = 'RG_IE'
+      Origin = 'RG_IE'
+      Size = 14
+    end
+    object QryClientesDATA_CADASTRO: TDateField
+      FieldName = 'DATA_CADASTRO'
+      Origin = 'DATA_CADASTRO'
+      Required = True
+    end
+    object QryClientesATIVO: TStringField
+      FieldName = 'ATIVO'
+      Origin = 'ATIVO'
+      FixedChar = True
+      Size = 1
+    end
+    object QryClientesID_1: TIntegerField
+      AutoGenerateValue = arDefault
+      FieldName = 'ID_1'
+      Origin = 'ID'
+      ProviderFlags = []
+      ReadOnly = True
+    end
+    object QryClientesIDCLIENTE: TIntegerField
+      AutoGenerateValue = arDefault
+      FieldName = 'IDCLIENTE'
+      Origin = 'IDCLIENTE'
+      ProviderFlags = []
+      ReadOnly = True
+    end
+    object QryClientesCEP: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'CEP'
+      Origin = 'CEP'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 8
+    end
+    object QryClientesLOGRADOURO: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'LOGRADOURO'
+      Origin = 'LOGRADOURO'
+      ProviderFlags = []
+      ReadOnly = True
+      FixedChar = True
+      Size = 50
+    end
+    object QryClientesNUMERO: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'NUMERO'
+      Origin = 'NUMERO'
+      ProviderFlags = []
+      ReadOnly = True
+      FixedChar = True
+      Size = 5
+    end
+    object QryClientesCOMPLEMENTO: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'COMPLEMENTO'
+      Origin = 'COMPLEMENTO'
+      ProviderFlags = []
+      ReadOnly = True
+      FixedChar = True
+      Size = 10
+    end
+    object QryClientesBAIRRO: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'BAIRRO'
+      Origin = 'BAIRRO'
+      ProviderFlags = []
+      ReadOnly = True
+      FixedChar = True
+      Size = 40
+    end
+    object QryClientesCIDADE: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'CIDADE'
+      Origin = 'CIDADE'
+      ProviderFlags = []
+      ReadOnly = True
+      FixedChar = True
+      Size = 40
+    end
+    object QryClientesESTADO: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'ESTADO'
+      Origin = 'ESTADO'
+      ProviderFlags = []
+      ReadOnly = True
+      FixedChar = True
+      Size = 30
+    end
+    object QryClientesPAIS: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'PAIS'
+      Origin = 'PAIS'
+      ProviderFlags = []
+      ReadOnly = True
+      FixedChar = True
+    end
   end
   object dsClientes: TDataSource
     DataSet = QryClientes

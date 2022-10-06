@@ -71,6 +71,23 @@ type
     QryClientes: TFDQuery;
     dsClientes: TDataSource;
     imgFormulario: TImageList;
+    QryClientesID: TFDAutoIncField;
+    QryClientesNOME: TStringField;
+    QryClientesTIPO: TStringField;
+    QryClientesCPF_CNPJ: TStringField;
+    QryClientesRG_IE: TStringField;
+    QryClientesDATA_CADASTRO: TDateField;
+    QryClientesATIVO: TStringField;
+    QryClientesID_1: TIntegerField;
+    QryClientesIDCLIENTE: TIntegerField;
+    QryClientesCEP: TStringField;
+    QryClientesLOGRADOURO: TStringField;
+    QryClientesNUMERO: TStringField;
+    QryClientesCOMPLEMENTO: TStringField;
+    QryClientesBAIRRO: TStringField;
+    QryClientesCIDADE: TStringField;
+    QryClientesESTADO: TStringField;
+    QryClientesPAIS: TStringField;
     procedure rdbPessoaFisicaClick(Sender: TObject);
     procedure rdbPessoaJuridicaClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -84,17 +101,41 @@ type
     procedure dbgListaClientesDrawColumnCell(Sender: TObject; const Rect: TRect;
       DataCol: Integer; Column: TColumn; State: TGridDrawState);
     procedure dbgListaClientesCellClick(Column: TColumn);
+    procedure QryClientesAfterScroll(DataSet: TDataSet);
+    procedure dbeCPF_CNPJMouseEnter(Sender: TObject);
+    procedure dbeRG_IEMouseEnter(Sender: TObject);
+    procedure dbeNomeClienteKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeCPF_CNPJKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeRG_IEKeyPress(Sender: TObject; var Key: Char);
+    procedure dtpDataCadastroKeyPress(Sender: TObject; var Key: Char);
+    procedure dcbAtivoKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeCEPKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeLogadouroKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeNumeroKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeComplementoKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeBairroKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeCidadeKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeEstadoKeyPress(Sender: TObject; var Key: Char);
+    procedure dbePaisKeyPress(Sender: TObject; var Key: Char);
+    procedure dbeCPF_CNPJEnter(Sender: TObject);
   private
-    procedure SetarBotoesTelefone(Status: Boolean=True);
-    procedure SetarPainelMestre(Status: Boolean=False);
-    procedure SetarBotoesCliente(Status: Boolean=False);
-    procedure SetarPainelHeader(Status: Boolean=True);
     procedure ListarClientes;
+
+    procedure SetarBotoesTelefone(Status: Boolean=True);
+    procedure SetarPainelHeader;
+    procedure SetarPainelMestre;
+    procedure SetarPainelDetalhes;
+    procedure SetarBotoesCliente;
     procedure SetarCampos(Operacao: Integer=1);
+    procedure SetarCamposObrigatorios;
+    procedure SetarTipoPessoaPadrao;
+    procedure SetarCamposSomenteLeitura;
+    procedure ValidaCamposSomenteLeitura;
 
     function GravarDadosInformados: Boolean;
     function ValidaCampos: Boolean;
-    procedure SetarCamposObrigatorios;
+    function TipoPessoaSelecionada: Boolean;
+
     { Private declarations }
   public
     { Public declarations }
@@ -113,11 +154,11 @@ procedure TfrmClientes.FormCreate(Sender: TObject);
 begin
   dtpDataCadastro.Date := Now;
 
-  SetarBotoesTelefone;
-
   SetarPainelMestre;
-
-  SetarBotoesCliente(True);
+  SetarPainelDetalhes;
+  SetarBotoesCliente;
+  SetarBotoesTelefone;
+  SetarTipoPessoaPadrao;
 
   ListarClientes;
 
@@ -129,27 +170,136 @@ begin
   if Key = VK_ESCAPE then Application.Terminate;
 end;
 
-procedure TfrmClientes.rdbPessoaFisicaClick(Sender: TObject);
-begin
-  lblCPFCNPJ.Caption := 'CPF';
-  lblRGIE.Caption := 'RG';
-
-  dbeCPF_CNPJ.SetFocus;
-end;
-
 procedure TfrmClientes.btnClienteIncluirClick(Sender: TObject);
 begin
   QryClientes.Insert;
 
-  SetarPainelHeader(False);
-
-  SetarPainelMestre(True);
-
-  SetarBotoesCliente(False);
-
+  SetarPainelHeader;
+  SetarPainelMestre;
+  SetarPainelDetalhes;
+  SetarBotoesCliente;
+  SetarTipoPessoaPadrao;
   SetarCampos;
 
   dbeNomeCliente.SetFocus;
+end;
+
+procedure TfrmClientes.dbeBairroKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeCEPKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeCidadeKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeComplementoKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeCPF_CNPJEnter(Sender: TObject);
+begin
+  ValidaCamposSomenteLeitura
+end;
+
+procedure TfrmClientes.dbeCPF_CNPJKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeCPF_CNPJMouseEnter(Sender: TObject);
+begin
+  ValidaCamposSomenteLeitura;
+end;
+
+procedure TfrmClientes.dbeEstadoKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeLogadouroKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeNomeClienteKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeNumeroKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbePaisKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeRG_IEKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dbeRG_IEMouseEnter(Sender: TObject);
+begin
+  if dbeRG_IE.ReadOnly then
+  begin
+    Application.MessageBox('Favor selecionar se pessoa física ou jurídica', 'Aviso', mb_Ok+mb_IconExclamation);
+    gbxTipo.SetFocus;
+  end;
 end;
 
 procedure TfrmClientes.dbgListaClientesCellClick(Column: TColumn);
@@ -180,13 +330,31 @@ begin
    end;
 end;
 
+procedure TfrmClientes.dcbAtivoKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
+procedure TfrmClientes.dtpDataCadastroKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    begin
+      PostMessage(Handle, WM_NEXTDLGCTL, 0, 0);
+      Key := #0;
+    end;
+end;
+
 procedure TfrmClientes.btnClienteGravarClick(Sender: TObject);
 begin
   if (ValidaCampos) and (GravarDadosInformados) then
     begin
       SetarPainelMestre;
-
-      SetarBotoesCliente(True);
+      SetarPainelDetalhes;
+      SetarBotoesCliente;
     end;
 end;
 
@@ -194,11 +362,23 @@ procedure TfrmClientes.btnClienteCancelarClick(Sender: TObject);
 begin
   QryClientes.Cancel;
 
+  SetarPainelHeader;
   SetarPainelMestre;
-
-  SetarBotoesCliente(True);
-
+  SetarPainelDetalhes;
+  SetarBotoesCliente;
+  SetarTipoPessoaPadrao;
   SetarCamposObrigatorios;
+
+  dcbAtivo.Checked := False;
+end;
+
+procedure TfrmClientes.rdbPessoaFisicaClick(Sender: TObject);
+begin
+  lblCPFCNPJ.Caption := 'CPF';
+  lblRGIE.Caption := 'RG';
+
+  if QryClientes.State = dsInsert then
+    SetarCamposSomenteLeitura;
 end;
 
 procedure TfrmClientes.rdbPessoaJuridicaClick(Sender: TObject);
@@ -206,7 +386,8 @@ begin
   lblCPFCNPJ.Caption := 'CNPJ';
   lblRGIE.Caption := 'IE';
 
-  dbeCPF_CNPJ.SetFocus;
+  if QryClientes.State = dsInsert then
+    SetarCamposSomenteLeitura;
 end;
 
 procedure TfrmClientes.spbTelefoneIncluirClick(Sender: TObject);
@@ -233,34 +414,56 @@ begin
   spbTelefoneCancelar.Visible := not Status
 end;
 
-procedure TfrmClientes.SetarPainelMestre(Status: Boolean=False);
+procedure TfrmClientes.SetarPainelMestre;
 begin
-  pnlMaster.Enabled := Status;
+  pnlMaster.Enabled := (QryClientes.Active) And (QryClientes.State in [dsInsert, dsEdit]);
 end;
 
-procedure TfrmClientes.SetarBotoesCliente(Status: Boolean=False);
+procedure TfrmClientes.SetarPainelDetalhes;
 begin
-  btnClienteIncluir.Enabled   := Status;
-  btnClienteGravar.Visible    := not Status;
-  btnClienteCancelar.Visible  := not Status;
+  pnlDetails.Enabled := QryClientes.State in [dsInactive, dsBrowse];
 end;
 
-procedure TfrmClientes.SetarPainelHeader(Status: Boolean=True);
+procedure TfrmClientes.SetarBotoesCliente;
 begin
-  pnlHeader.Enabled := Status;
+  btnClienteIncluir.Enabled  := QryClientes.State in [dsInactive, dsBrowse];
+  btnClienteGravar.Visible   := QryClientes.State in [dsInsert, dsEdit];
+  btnClienteCancelar.Visible := QryClientes.State in [dsInsert, dsEdit];
+end;
+
+procedure TfrmClientes.SetarPainelHeader;
+begin
+  pnlHeader.Enabled := (QryClientes.Active) And (QryClientes.State in [dsBrowse]);
 end;
 
 procedure TfrmClientes.SetarCampos(Operacao: Integer=1);
 begin
   case Operacao of
     1:  begin
+          SetarTipoPessoaPadrao;
+          SetarCamposSomenteLeitura;
           dcbAtivo.Checked := True;
-          dtpDataCadastro.Date := now;
+          dtpDataCadastro.Date := Trunc(Now);
         end;
 
     2:  begin
+          rdbPessoaFisica.Checked := QryClientes.FieldByName('TIPO').AsString = 'F';
+          rdbPessoaJuridica.Checked := QryClientes.FieldByName('TIPO').AsString = 'J';
+
+          dcbAtivo.Checked := QryClientes.FieldByName('ATIVO').AsString = 'A';
         end;
   end;
+end;
+
+procedure TfrmClientes.SetarCamposSomenteLeitura;
+begin
+  dbeCPF_CNPJ.ReadOnly := (QryClientes.State in [dsInsert]) and (not TipoPessoaSelecionada);
+  dbeRG_IE.ReadOnly := (QryClientes.State in [dsInsert]) and (not TipoPessoaSelecionada);
+end;
+
+function  TfrmClientes.TipoPessoaSelecionada: Boolean;
+begin
+  Result := ((rdbPessoaFisica.Checked) or (rdbPessoaJuridica.Checked));
 end;
 
 procedure TfrmClientes.ListarClientes;
@@ -268,10 +471,15 @@ begin
   QryClientes.Close;
   QryClientes.SQL.Clear;
   QryClientes.SQL.Add('SELECT * FROM CLIENTES c');
-  QryClientes.SQL.Add('LEFT JOIN TELEFONES t on t.IDCLIENTE = c.ID');
   QryClientes.SQL.Add('LEFT JOIN ENDERECOS e on e.IDCLIENTE = c.ID');
   QryClientes.Close;
   QryClientes.Open;
+end;
+
+procedure TfrmClientes.QryClientesAfterScroll(DataSet: TDataSet);
+begin
+  if QryClientes.State = dsBrowse then
+    dtpDataCadastro.Date := Trunc(QryClientes.FieldByName('DATA_CADASTRO').AsDateTime);
 end;
 
 function TfrmClientes.ValidaCampos: Boolean;
@@ -373,6 +581,21 @@ begin
   lblCPFCNPJ.Font.Style := [];
 end;
 
+procedure TfrmClientes.ValidaCamposSomenteLeitura;
+begin
+  if (dbeCPF_CNPJ.ReadOnly) or (dbeRG_IE.ReadOnly) then
+  begin
+    Application.MessageBox('Favor selecionar se pessoa física ou jurídica', 'Aviso', mb_Ok+mb_IconExclamation);
+
+    gbxTipo.SetFocus;
+  end;
+end;
+
+procedure TfrmClientes.SetarTipoPessoaPadrao;
+begin
+  rdbPessoaFisica.Checked := False;
+  rdbPessoaJuridica.Checked := False;
+end;
+
+
 end.
-
-
