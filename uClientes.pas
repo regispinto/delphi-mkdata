@@ -9,7 +9,7 @@ uses
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
   FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
-  System.ImageList, Vcl.ImgList;
+  System.ImageList, Vcl.ImgList, System.StrUtils;
 
 type
   TfrmClientes = class(TForm)
@@ -17,12 +17,11 @@ type
     pnlFooter: TPanel;
     pnlDetails: TPanel;
     edtPesquisa: TEdit;
-    spbPesquisar: TSpeedButton;
     lblPesquisa: TLabel;
     pnlMaster: TPanel;
     gbxStatus: TGroupBox;
     rdbAtivos: TRadioButton;
-    rbtInativos: TRadioButton;
+    rdbInativos: TRadioButton;
     rdbTodos: TRadioButton;
     lblCliente: TLabel;
     gbxTipo: TGroupBox;
@@ -42,8 +41,6 @@ type
     dbeTelefoneNumero: TDBEdit;
     dbeTelefoneDDD: TDBEdit;
     spbTelefoneIncluir: TSpeedButton;
-    spbTelefoneGravar: TSpeedButton;
-    spbTelefoneCancelar: TSpeedButton;
     btnClienteIncluir: TBitBtn;
     gbxEndereco: TGroupBox;
     spbPesquisaCEP: TSpeedButton;
@@ -78,23 +75,13 @@ type
     QryClientesRG_IE: TStringField;
     QryClientesDATA_CADASTRO: TDateField;
     QryClientesATIVO: TStringField;
-    QryClientesID_1: TIntegerField;
-    QryClientesIDCLIENTE: TIntegerField;
-    QryClientesCEP: TStringField;
-    QryClientesLOGRADOURO: TStringField;
-    QryClientesNUMERO: TStringField;
-    QryClientesCOMPLEMENTO: TStringField;
-    QryClientesBAIRRO: TStringField;
-    QryClientesCIDADE: TStringField;
-    QryClientesESTADO: TStringField;
-    QryClientesPAIS: TStringField;
+    QryClientesEDTIAR: TBooleanField;
+    QryClientesEXCLUIR: TBooleanField;
     procedure rdbPessoaFisicaClick(Sender: TObject);
     procedure rdbPessoaJuridicaClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure spbTelefoneIncluirClick(Sender: TObject);
-    procedure spbTelefoneGravarClick(Sender: TObject);
-    procedure spbTelefoneCancelarClick(Sender: TObject);
     procedure btnClienteIncluirClick(Sender: TObject);
     procedure btnClienteGravarClick(Sender: TObject);
     procedure btnClienteCancelarClick(Sender: TObject);
@@ -118,6 +105,14 @@ type
     procedure dbeEstadoKeyPress(Sender: TObject; var Key: Char);
     procedure dbePaisKeyPress(Sender: TObject; var Key: Char);
     procedure dbeCPF_CNPJEnter(Sender: TObject);
+    procedure QryClientesTIPOGetText(Sender: TField; var Text: string;
+      DisplayText: Boolean);
+    procedure QryClientesATIVOGetText(Sender: TField; var Text: string;
+      DisplayText: Boolean);
+    procedure edtPesquisaChange(Sender: TObject);
+    procedure rdbAtivosClick(Sender: TObject);
+    procedure rdbInativosClick(Sender: TObject);
+    procedure rdbTodosClick(Sender: TObject);
   private
     procedure ListarClientes;
 
@@ -304,29 +299,32 @@ end;
 
 procedure TfrmClientes.dbgListaClientesCellClick(Column: TColumn);
 begin
-  {Validamos se estamos na Coluna 3 e se o valor do campo Ativo é N , se for mudamos para S}
-  if Column.Index = 2 Then
-    if Column.Grid.DataSource.DataSet.Fields[Column.Index].AsString = 'N' Then
+  case Column.Index of
+    6:
       begin
-        Column.Grid.DataSource.DataSet.Edit;
-        Column.Grid.DataSource.DataSet.Fields[Column.Index].Value := 'S'
-      end
-    else
-      begin
-        Column.Grid.DataSource.DataSet.Edit;
-        Column.Grid.DataSource.DataSet.Fields[Column.Index].Value := 'N'
+        ShowMessage('Teste 1');
       end;
+
+    7:
+      begin
+        ShowMessage('Teste 2');
+      end;
+  end;
 end;
 
 procedure TfrmClientes.dbgListaClientesDrawColumnCell(Sender: TObject;
   const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
 begin
-  if Column.Field = QryClientes.FieldByName('ATIVO') then
+  if Column.Field = QryClientes.FieldByName('EDITAR') then
    begin
      TDBGrid(Sender).Canvas.FillRect(Rect);
-     imgFormulario.Draw(TDBGrid(Sender).Canvas, Rect.Left +1,Rect.Top + 1, 0);
-     if QryClientes.FieldByName('ATIVO').Text = 'S' then
-       imgFormulario.Draw(TDBGrid(Sender).Canvas, Rect.Left +1,Rect.Top + 1, 1)
+     ImgFormulario.Draw(TDBGrid(Sender).Canvas, Rect.Left + 1, Rect.Top + 1, 2);
+   end;
+
+  if Column.Field = QryClientes.FieldByName('EXCLUIR') then
+   begin
+     TDBGrid(Sender).Canvas.FillRect(Rect);
+     ImgFormulario.Draw(TDBGrid(Sender).Canvas, Rect.Left + 1, Rect.Top + 1, 3);
    end;
 end;
 
@@ -348,13 +346,21 @@ begin
     end;
 end;
 
+procedure TfrmClientes.edtPesquisaChange(Sender: TObject);
+begin
+  ListarClientes;
+end;
+
 procedure TfrmClientes.btnClienteGravarClick(Sender: TObject);
 begin
   if (ValidaCampos) and (GravarDadosInformados) then
     begin
+      SetarPainelHeader;
       SetarPainelMestre;
       SetarPainelDetalhes;
       SetarBotoesCliente;
+
+      dbgListaClientes.SetFocus;
     end;
 end;
 
@@ -370,6 +376,23 @@ begin
   SetarCamposObrigatorios;
 
   dcbAtivo.Checked := False;
+
+  dbgListaClientes.SetFocus;
+end;
+
+procedure TfrmClientes.rdbAtivosClick(Sender: TObject);
+begin
+  ListarClientes;
+end;
+
+procedure TfrmClientes.rdbInativosClick(Sender: TObject);
+begin
+  ListarClientes;
+end;
+
+procedure TfrmClientes.rdbTodosClick(Sender: TObject);
+begin
+  ListarClientes
 end;
 
 procedure TfrmClientes.rdbPessoaFisicaClick(Sender: TObject);
@@ -397,21 +420,9 @@ begin
   dbeTelefoneDDD.SetFocus;
 end;
 
-procedure TfrmClientes.spbTelefoneCancelarClick(Sender: TObject);
-begin
-  SetarBotoesTelefone;
-end;
-
-procedure TfrmClientes.spbTelefoneGravarClick(Sender: TObject);
-begin
-  SetarBotoesTelefone;
-end;
-
 procedure TfrmClientes.SetarBotoesTelefone(Status: Boolean=True);
 begin
-  spbTelefoneIncluir.Enabled  := Status;
-  spbTelefoneGravar.Visible   := not Status;
-  spbTelefoneCancelar.Visible := not Status
+  spbTelefoneIncluir.Enabled := Status;
 end;
 
 procedure TfrmClientes.SetarPainelMestre;
@@ -439,26 +450,28 @@ end;
 procedure TfrmClientes.SetarCampos(Operacao: Integer=1);
 begin
   case Operacao of
-    1:  begin
-          SetarTipoPessoaPadrao;
-          SetarCamposSomenteLeitura;
-          dcbAtivo.Checked := True;
-          dtpDataCadastro.Date := Trunc(Now);
-        end;
+    1:
+      begin
+        SetarTipoPessoaPadrao;
+        SetarCamposSomenteLeitura;
+        dcbAtivo.Checked := True;
+        dtpDataCadastro.Date := Trunc(Now);
+      end;
 
-    2:  begin
-          rdbPessoaFisica.Checked := QryClientes.FieldByName('TIPO').AsString = 'F';
-          rdbPessoaJuridica.Checked := QryClientes.FieldByName('TIPO').AsString = 'J';
+    2:
+      begin
+        rdbPessoaFisica.Checked := QryClientes.FieldByName('TIPO').AsString = 'F';
+        rdbPessoaJuridica.Checked := QryClientes.FieldByName('TIPO').AsString = 'J';
 
-          dcbAtivo.Checked := QryClientes.FieldByName('ATIVO').AsString = 'A';
-        end;
+        dcbAtivo.Checked := QryClientes.FieldByName('ATIVO').AsString = 'A';
+      end;
   end;
 end;
 
 procedure TfrmClientes.SetarCamposSomenteLeitura;
 begin
-  dbeCPF_CNPJ.ReadOnly := (QryClientes.State in [dsInsert]) and (not TipoPessoaSelecionada);
-  dbeRG_IE.ReadOnly := (QryClientes.State in [dsInsert]) and (not TipoPessoaSelecionada);
+  dbeCPF_CNPJ.ReadOnly := (QryClientes.State in [dsInsert, dsEdit]) and (not TipoPessoaSelecionada);
+  dbeRG_IE.ReadOnly := (QryClientes.State in [dsInsert, dsEdit]) and (not TipoPessoaSelecionada);
 end;
 
 function  TfrmClientes.TipoPessoaSelecionada: Boolean;
@@ -467,19 +480,64 @@ begin
 end;
 
 procedure TfrmClientes.ListarClientes;
+var
+  Where: String;
+
 begin
   QryClientes.Close;
   QryClientes.SQL.Clear;
-  QryClientes.SQL.Add('SELECT * FROM CLIENTES c');
-  QryClientes.SQL.Add('LEFT JOIN ENDERECOS e on e.IDCLIENTE = c.ID');
-  QryClientes.Close;
+  QryClientes.SQL.Add('SELECT * FROM CLIENTES');
+
+  where := '';
+
+  if Trim(edtPesquisa.Text) <> EmptyStr then
+    where := where + 'NOME like ' + QuotedStr('%' + Trim(edtPesquisa.Text) + '%') + ' and ';
+
+  if rdbAtivos.Checked then
+    where := where + 'ATIVO = ' + QuotedStr('A') + ' and ';
+
+  if rdbInativos.Checked then
+    where := where + 'ATIVO = ' + QuotedStr('I') + ' and ';
+
+  if Where <> EmptyStr then
+    begin
+      where := Copy(Where, 1, length(Where)- 5);
+
+      QryClientes.SQL.Add('WHERE ' + Where);
+    end;
+
+  SaveLog(QryClientes.SQL.Text);
+
   QryClientes.Open;
 end;
 
 procedure TfrmClientes.QryClientesAfterScroll(DataSet: TDataSet);
 begin
   if QryClientes.State = dsBrowse then
-    dtpDataCadastro.Date := Trunc(QryClientes.FieldByName('DATA_CADASTRO').AsDateTime);
+    begin
+      rdbPessoaFisica.Checked := QryClientes.FieldByName('TIPO').AsString = 'F';
+      rdbPessoaJuridica.Checked := QryClientes.FieldByName('TIPO').AsString = 'J';
+      dcbAtivo.Checked := QryClientes.FieldByName('ATIVO').AsString = 'A';
+      dtpDataCadastro.Date := Trunc(QryClientes.FieldByName('DATA_CADASTRO').AsDateTime);
+    end;
+end;
+
+procedure TfrmClientes.QryClientesATIVOGetText(Sender: TField; var Text: string;
+  DisplayText: Boolean);
+begin
+  case AnsiIndexStr(QryClientes.FieldByName('ATIVO').AsString, ['A', 'I']) of
+    0: Text := 'Ativo';
+    1: Text := 'Inativo';
+  end;
+end;
+
+procedure TfrmClientes.QryClientesTIPOGetText(Sender: TField; var Text: string;
+  DisplayText: Boolean);
+begin
+  case AnsiIndexStr(QryClientes.FieldByName('TIPO').AsString, ['F', 'J']) of
+    0: Text := 'Física';
+    1: Text := 'Jurídica';
+  end;
 end;
 
 function TfrmClientes.ValidaCampos: Boolean;
@@ -525,40 +583,19 @@ var
 
 begin
   try
-    try
-      SaveSQL := TFDQuery.Create(Application);
-      SaveSQL.Connection := Dm.FDConnection;
-      SaveSQL.SQL.Clear;
-      SaveSQL.SQL.Add('insert into CLIENTES ');
-      SaveSQL.SQL.Add('(nome, tipo, cpf_cnpj, rg_ie, data_cadastro, ativo) ');
-      SaveSQL.SQL.Add('values ');
-      SaveSQL.SQL.Add('(:pNome, :pTipo, :pCpfCnpj, :pRgIe, :pCadastro, :pAtivo)');
-      //
-      SaveSQL.ParamByName('pNome').AsString := dbeNomeCliente.Text;
-      SaveSQL.ParamByName('pTipo').AsString := 'F';
+    if rdbPessoaFisica.Checked then
+      QryClientes.FieldByName('TIPO').AsString := 'F'
+    else if rdbPessoaJuridica.Checked then
+      QryClientes.FieldByName('TIPO').AsString := 'J';
 
-      if rdbPessoaJuridica.Checked then
-        SaveSQL.ParamByName('pTipo').AsString  := 'J';
+    QryClientes.FieldByName('DATA_CADASTRO').AsDateTime := dtpDataCadastro.Date;
 
-      SaveSQL.ParamByName('pCpfCnpj').AsString := dbeCPF_CNPJ.Text;
-      SaveSQL.ParamByName('pRgIe').AsString := dbeRG_IE.Text;
-      SaveSQL.ParamByName('pCadastro').AsDate := dtpDataCadastro.Date;
-      SaveSQL.ParamByName('pAtivo').AsString := 'I';
+    if dcbAtivo.Checked then
+      QryClientes.FieldByName('ATIVO').AsString := 'A'
+    else
+      QryClientes.FieldByName('ATIVO').AsString := 'I';
 
-      if dcbAtivo.Checked then
-        SaveSQL.ParamByName('pAtivo').AsString := 'A';
-
-      SaveLog(SaveSQL.SQL.Text);
-
-      SaveSQL.ExecSQL;
-
-      Result := SaveSQL.RowsAffected > 0;
-
-      ShowMessage( BoolToStr(Result, True) );
-    finally
-      FreeAndNil(SaveSQL);
-
-    end;
+    QryClientes.Post;
   except
     on E:Exception do
     begin
