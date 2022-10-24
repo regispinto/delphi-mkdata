@@ -149,7 +149,7 @@ object frmClientes: TfrmClientes
       DataSource = dsClientes
       DrawingStyle = gdsClassic
       FixedColor = clMoneyGreen
-      Options = [dgTitles, dgIndicator, dgTabs, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
+      Options = [dgTitles, dgIndicator, dgTabs, dgRowSelect, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
       TabOrder = 0
       TitleFont.Charset = DEFAULT_CHARSET
       TitleFont.Color = clWindowText
@@ -158,6 +158,7 @@ object frmClientes: TfrmClientes
       TitleFont.Style = []
       OnCellClick = dbgListaClientesCellClick
       OnDrawColumnCell = dbgListaClientesDrawColumnCell
+      OnMouseUp = dbgListaClientesMouseUp
       Columns = <
         item
           Expanded = False

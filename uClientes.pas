@@ -113,6 +113,8 @@ type
     procedure rdbAtivosClick(Sender: TObject);
     procedure rdbInativosClick(Sender: TObject);
     procedure rdbTodosClick(Sender: TObject);
+    procedure dbgListaClientesMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     procedure ListarClientes;
 
@@ -130,6 +132,8 @@ type
     function GravarDadosInformados: Boolean;
     function ValidaCampos: Boolean;
     function TipoPessoaSelecionada: Boolean;
+    procedure EditRecord;
+    procedure DeleteRecord;
 
     { Private declarations }
   public
@@ -138,6 +142,7 @@ type
 
 var
   frmClientes: TfrmClientes;
+  LocationClicked: Integer;
 
 implementation
 
@@ -177,6 +182,20 @@ begin
   SetarCampos;
 
   dbeNomeCliente.SetFocus;
+end;
+
+procedure TfrmClientes.EditRecord;
+begin
+  //
+end;
+
+procedure TfrmClientes.DeleteRecord;
+begin
+  if Application.MessageBox(PChar('Confirma a excliusão cliente ' + QryClientes.FieldByName('NOME').AsString),
+    'Exclusão',
+    MB_YESNO+MB_ICONINFORMATION+MB_DEFBUTTON2) = ID_YES  then
+    QryClientes.Delete;
+    //QryClientes.ApplyUpdates(0);
 end;
 
 procedure TfrmClientes.dbeBairroKeyPress(Sender: TObject; var Key: Char);
@@ -292,23 +311,38 @@ procedure TfrmClientes.dbeRG_IEMouseEnter(Sender: TObject);
 begin
   if dbeRG_IE.ReadOnly then
   begin
-    Application.MessageBox('Favor selecionar se pessoa física ou jurídica', 'Aviso', mb_Ok+mb_IconExclamation);
+    Application.MessageBox('Favor selecionar se pessoa física ou jurídica', 'Aviso', MB_OK+MB_ICONEXCLAMATION);
     gbxTipo.SetFocus;
   end;
 end;
 
-procedure TfrmClientes.dbgListaClientesCellClick(Column: TColumn);
+procedure TfrmClientes.dbgListaClientesMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  case Column.Index of
-    6:
-      begin
-        ShowMessage('Teste 1');
-      end;
+  LocationClicked := x;
+end;
 
-    7:
-      begin
-        ShowMessage('Teste 2');
-      end;
+procedure TfrmClientes.dbgListaClientesCellClick(Column: TColumn);
+var
+  ColumnClicked,
+  SumColumns: Integer;
+
+begin
+  ColumnClicked := -1;
+  SumColumns := 0;
+
+  while LocationClicked > SumColumns do begin
+    ColumnClicked := ColumnClicked + 1;
+    SumColumns  := SumColumns + dbgListaClientes.Columns[ColumnClicked].Width;
+  end;
+
+  ShowMessage('Coluna: ' + IntToStr(ColumnClicked) +#13+
+              'Título: ' + dbgListaClientes.Columns[ColumnClicked].Title.Caption +#13+
+              'Field: ' + dbgListaClientes.Columns[ColumnClicked].FieldName);
+
+  case ColumnClicked of
+    6: EditRecord;
+    7: DeleteRecord
   end;
 end;
 
@@ -622,7 +656,7 @@ procedure TfrmClientes.ValidaCamposSomenteLeitura;
 begin
   if (dbeCPF_CNPJ.ReadOnly) or (dbeRG_IE.ReadOnly) then
   begin
-    Application.MessageBox('Favor selecionar se pessoa física ou jurídica', 'Aviso', mb_Ok+mb_IconExclamation);
+    Application.MessageBox('Favor selecionar se pessoa física ou jurídica', 'Aviso', MB_OK+MB_ICONEXCLAMATION);
 
     gbxTipo.SetFocus;
   end;
