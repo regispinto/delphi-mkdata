@@ -130,7 +130,7 @@ begin
     end;
 
   finally
-    QrySQL.Destroy;
+    FreeAndNil(QrySQL);
 
   end;
 end;

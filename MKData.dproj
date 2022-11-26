@@ -109,9 +109,9 @@
             <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
-        <DCCReference Include="GenericFunctions\uFunctions.pas"/>
-        <DCCReference Include="ClassConnection\uClassConnection.pas"/>
         <DCCReference Include="ClassCustomers\ClassCustomers.pas"/>
+        <DCCReference Include="..\ClassConnection\uClassConnection.pas"/>
+        <DCCReference Include="..\GenericFunctions\uFunctions.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

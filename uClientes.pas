@@ -639,6 +639,8 @@ begin
       QryClientes.FieldByName('ATIVO').AsString := 'I';
 
     QryClientes.Post;
+
+    Result := QryClientes.ApplyUpdates(0) = 0;
   except
     on E:Exception do
     begin

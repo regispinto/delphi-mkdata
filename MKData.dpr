@@ -4,9 +4,9 @@ uses
   Vcl.Forms,
   uClientes in 'uClientes.pas' {frmClientes},
   uDM in 'uDM.pas' {DM: TDataModule},
-  uFunctions in 'GenericFunctions\uFunctions.pas',
-  uClassConnection in 'ClassConnection\uClassConnection.pas',
-  ClassCustomers in 'ClassCustomers\ClassCustomers.pas';
+  ClassCustomers in 'ClassCustomers\ClassCustomers.pas',
+  uClassConnection in '..\ClassConnection\uClassConnection.pas',
+  uFunctions in '..\GenericFunctions\uFunctions.pas';
 
 {$R *.res}
 
