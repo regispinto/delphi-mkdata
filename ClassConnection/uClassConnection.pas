@@ -55,12 +55,12 @@ type
 
       function GetTables(SQLText: string): TDataSet;
       function GetDllDriver(Dll: string): Boolean;
+      function CreateFolderBD: string;
 
       procedure SetConnectDatabase;
       function ConnectionDatabase: Boolean;
       function CreateDatabase: Boolean;
 
-      procedure CreateFolderBD;
       procedure CreateUpedateDB;
    end;
 
@@ -80,9 +80,23 @@ begin
   inherited;
 end;
 
+Function TConnect.CreateFolderBD: string;
+var
+  LPath: String;
+
+begin
+  LPath := '\' + FPath;
+  CreatePath(LPath);
+
+  LPath := LPath + '\' + FFileName;
+  CreateFile(LPath);
+
+  Result := LPath;
+end;
+
 procedure TConnect.SetConnectDatabase;
 begin
-  CreateFolderBD;
+  FDatabase := CreateFolderBD;
 
   FConnection.Params.Clear;
   FConnection.Params.Add('DriverID=' + DriverID);
@@ -179,20 +193,6 @@ begin
     FreeAndNil(Qry)
 
   end;
-end;
-
-procedure TConnect.createFolderBD;
-var
-  LPath: String;
-
-begin
-  LPath := '\' + FPath;
-  CreatePath(LPath);
-
-  LPath := LPath + '\' + FFileName;
-  CreateFile(LPath);
-
-  FDatabase := LPath;
 end;
 
 function TConnect.GetDllDriver(Dll: String): Boolean;

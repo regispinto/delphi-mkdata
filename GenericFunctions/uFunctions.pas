@@ -17,11 +17,11 @@ uses
   procedure SaveIni(Key1, Key2, aTexto: string; FileName: string='config.ini');
   procedure CreateIniParams(FileName: string);
   procedure CreatePath(var Path: string);
-  procedure CreateFile(var Path: string);
+  procedure CreateFile(Path: string);
 
 implementation
 
-procedure saveIni(Key1, Key2, aTexto: string; FileName: string='config.ini');
+procedure SaveIni(Key1, Key2, aTexto: string; FileName: string='config.ini');
 var
   ArqIni: TIniFile;
 
@@ -66,12 +66,12 @@ begin
   if not (FileExists(FileName)) then
     begin
       LPath := LPath + '\' + FileName;
-      createFile(FileName);
+      CreateFile(FileName);
       Result := False;
     end;
 end;
 
-procedure createIniParams(FileName: string);
+procedure CreateIniParams(FileName: string);
 begin
   {$IFDEF MYSQL}
   saveIni('BANCO', 'Port', '3306');
@@ -156,7 +156,7 @@ begin
   ForceDirectories(Path);
 end;
 
-procedure CreateFile(var Path: String);
+procedure CreateFile(Path: String);
 var
   LFile: TextFile;
 
