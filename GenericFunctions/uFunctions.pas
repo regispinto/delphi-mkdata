@@ -8,7 +8,7 @@ uses
   Vcl.Grids, FireDAC.Comp.Client, IniFiles;
 
   function TrocaVirgulaPorPonto(Valor: string): string;
-  function SaveLog(Log: String): string;
+  function SaveLog(Log: string): string;
   function NextID(Connection: TFDConnection; Table, Field: string): integer;
   function CheckIniParams(FileName: string): Boolean;
   function GetFileFromUrl(Url: String): String;
