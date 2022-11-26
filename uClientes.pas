@@ -9,7 +9,9 @@ uses
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
   FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
-  System.ImageList, Vcl.ImgList, System.StrUtils;
+  System.ImageList, Vcl.ImgList, System.StrUtils,
+
+  ClassCustomers;
 
 type
   TfrmClientes = class(TForm)
@@ -105,16 +107,13 @@ type
     procedure dbeEstadoKeyPress(Sender: TObject; var Key: Char);
     procedure dbePaisKeyPress(Sender: TObject; var Key: Char);
     procedure dbeCPF_CNPJEnter(Sender: TObject);
-    procedure QryClientesTIPOGetText(Sender: TField; var Text: string;
-      DisplayText: Boolean);
-    procedure QryClientesATIVOGetText(Sender: TField; var Text: string;
-      DisplayText: Boolean);
+    procedure QryClientesTIPOGetText(Sender: TField; var Text: string; DisplayText: Boolean);
+    procedure QryClientesATIVOGetText(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure edtPesquisaChange(Sender: TObject);
     procedure rdbAtivosClick(Sender: TObject);
     procedure rdbInativosClick(Sender: TObject);
     procedure rdbTodosClick(Sender: TObject);
-    procedure dbgListaClientesMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure dbgListaClientesMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     procedure ListarClientes;
 
@@ -138,6 +137,7 @@ type
     { Private declarations }
   public
     { Public declarations }
+    Cliente: TCustomers;
   end;
 
 var
@@ -152,6 +152,8 @@ uses uDM, uFunctions, uClassConnection;
 
 procedure TfrmClientes.FormCreate(Sender: TObject);
 begin
+  Cliente := TCustomers.Create(dm.FDConnection, dm.Connection.Database);
+
   dtpDataCadastro.Date := Now;
 
   SetarPainelMestre;
@@ -186,16 +188,23 @@ end;
 
 procedure TfrmClientes.EditRecord;
 begin
-  //
+  QryClientes.Edit;
+
+  SetarPainelHeader;
+  SetarPainelMestre;
+  SetarPainelDetalhes;
+  SetarBotoesCliente;
+  SetarTipoPessoaPadrao;
+  SetarCampos;
+
+  dbeNomeCliente.SetFocus;
 end;
 
 procedure TfrmClientes.DeleteRecord;
 begin
   if Application.MessageBox(PChar('Confirma a excliusão cliente ' + QryClientes.FieldByName('NOME').AsString),
-    'Exclusão',
-    MB_YESNO+MB_ICONINFORMATION+MB_DEFBUTTON2) = ID_YES  then
+    'Exclusão', MB_YESNO+MB_ICONINFORMATION+MB_DEFBUTTON2) = ID_YES  then
     QryClientes.Delete;
-    //QryClientes.ApplyUpdates(0);
 end;
 
 procedure TfrmClientes.dbeBairroKeyPress(Sender: TObject; var Key: Char);
@@ -483,8 +492,8 @@ end;
 
 procedure TfrmClientes.SetarCampos(Operacao: Integer=1);
 begin
-  case Operacao of
-    1:
+  case QryClientes.State of
+    dsInsert:
       begin
         SetarTipoPessoaPadrao;
         SetarCamposSomenteLeitura;
@@ -492,7 +501,7 @@ begin
         dtpDataCadastro.Date := Trunc(Now);
       end;
 
-    2:
+    dsEdit:
       begin
         rdbPessoaFisica.Checked := QryClientes.FieldByName('TIPO').AsString = 'F';
         rdbPessoaJuridica.Checked := QryClientes.FieldByName('TIPO').AsString = 'J';

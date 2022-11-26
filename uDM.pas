@@ -24,7 +24,7 @@ type
   private
     { Private declarations }
   public
-    Conexao : TConnect;
+    Connection : TConnect;
 
     { Public declarations }
   end;
@@ -42,21 +42,21 @@ uses uClientes;
 
 procedure TDM.DataModuleCreate(Sender: TObject);
 begin
-  Conexao := TConnect.Create( FDConnection );
+  Connection := TConnect.Create( FDConnection );
 
   try
-    Conexao.DriverID  := 'SQLite';
-    Conexao.FileName  := 'mkdata.db';
-    Conexao.Path      := 'Database';
+    Connection.DriverID := 'SQLite';
+    Connection.FileName := 'mkdata.db';
+    Connection.Path     := 'Database';
 
-    Conexao.SetConnectDatabase;
+    Connection.SetConnectDatabase;
 
-    if not Conexao.ConnectionDatabase then
-      Conexao.CreateDatabase;
+    if not Connection.ConnectionDatabase then
+      Connection.CreateDatabase;
 
-    Conexao.CreateUpedateDB;
+    Connection.CreateUpedateDB;
   finally
-    FreeAndNil(Conexao)
+    //FreeAndNil(Conexao)
 
   end;
 

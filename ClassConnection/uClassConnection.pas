@@ -95,9 +95,9 @@ begin
 
     1: begin
         FServer := LoadIni('BANCO', 'Server', '127.0.0.1');
-        FUser := LoadIni('BANCO', 'UserName', 'root');
-        FPass := LoadIni('BANCO', 'Password', '123456');
-        FPort := LoadIni('BANCO', 'Port', '3306');
+        FUser   := LoadIni('BANCO', 'UserName', 'root');
+        FPass   := LoadIni('BANCO', 'Password', '123456');
+        FPort   := LoadIni('BANCO', 'Port', '3306');
 
         FConnection.Params.Add('Server=' + FServer);
         FConnection.Params.Add('user_name=' + FUser);
@@ -195,13 +195,13 @@ begin
   FDatabase := LPath;
 end;
 
-function TConnect.getDllDriver(Dll: String): Boolean;
+function TConnect.GetDllDriver(Dll: String): Boolean;
 begin
   Result := True;
 
   if not (FileExists(Dll)) then
     begin
-      ShowMessage('Arquivo ' + Dll + ' não foi localizado.' +#13+ 'Verifique!');
+      ShowMessage('Arquivo ' + Dll + ' não foi localizado.' +#13+ 'Favor verificar!');
 
       Result := False;
     end;
