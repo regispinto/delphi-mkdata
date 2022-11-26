@@ -307,3 +307,8 @@ begin
   end;
 end;
 end.
+
+//Function FireBirdStarted: Boolean;
+//Begin
+//Result := ( FindWindow( ´FB_Guard´, Nil ) <> 0 ) ;
+//End;
