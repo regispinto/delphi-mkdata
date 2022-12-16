@@ -5,8 +5,9 @@ uses
   uClientes in 'uClientes.pas' {frmClientes},
   uDM in 'uDM.pas' {DM: TDataModule},
   ClassCustomers in 'ClassCustomers\ClassCustomers.pas',
-  uClassConnection in '..\ClassConnection\uClassConnection.pas',
-  uFunctions in '..\GenericFunctions\uFunctions.pas';
+  uCreateTables in 'Tables\uCreateTables.pas',
+  ClassConnection in 'ClassConnection\ClassConnection.pas',
+  uFunctions in 'GenericFunctions\uFunctions.pas';
 
 {$R *.res}
 

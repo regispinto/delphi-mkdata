@@ -11,7 +11,7 @@ uses
   FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
   System.ImageList, Vcl.ImgList, System.StrUtils,
 
-  ClassCustomers;
+  uFunctions, ClassCustomers, ClassConnection;
 
 type
   TfrmClientes = class(TForm)
@@ -148,7 +148,7 @@ implementation
 
 {$R *.dfm}
 
-uses uDM, uFunctions, uClassConnection;
+uses uDM;
 
 procedure TfrmClientes.FormCreate(Sender: TObject);
 begin

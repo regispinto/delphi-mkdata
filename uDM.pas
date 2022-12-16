@@ -12,7 +12,7 @@ uses
   FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
   FireDAC.Comp.UI, FireDAC.Phys.MySQLDef, FireDAC.Phys.MySQL,
 
-  uFunctions, uClassConnection;
+  uFunctions, ClassConnection, uCreateTables;
 
 type
   TDM = class(TDataModule)
@@ -54,9 +54,9 @@ begin
     if not Connection.ConnectionDatabase then
       Connection.CreateDatabase;
 
-    Connection.CreateUpedateDB;
+    CreateUpedateDB;
   finally
-    //FreeAndNil(Conexao)
+    FreeAndNil(Connection)
 
   end;
 
