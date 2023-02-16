@@ -1,6 +1,6 @@
 Desafio Técnico
 
-## 🚀 Requisitos:
+## 🚀 Requisitos
 
 ### 🏳️ Criar uma tela para consulta dos clientes permitindo:
     📌 Filtrar por nome e/ou somente ativos.
